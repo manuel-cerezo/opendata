@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode (toggled on <html class="dark">) instead of
+   relying solely on the prefers-color-scheme media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens lifted from manuelcerezo.com (Astro Micro template). */
+@theme {
+  --font-heading: "Instrument Serif", Georgia, serif;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-light: #f7f7f7;
+  --color-dark: #151515;
+  --color-dark-green: #264d37;
+  --color-dark-gray: #4a5565;
+  --color-mustard: #e3b04b;
+
+  /* Semantic tokens resolved per theme via the variables below. */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+}
+
+:root {
+  --bg: #f7f7f7;
+  --surface: #ffffff;
+  --fg: #151515;
+  --muted: #4a5565;
+  --border: #e4e4e4;
+  --accent: #264d37;
+  --accent-soft: #e3b04b;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #151515;
+  --surface: #1e1e1e;
+  --fg: #f7f7f7;
+  --muted: #a0a8b4;
+  --border: #2c2c2c;
+  --accent: #6bbf8e;
+  --accent-soft: #e3b04b;
+  color-scheme: dark;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+}
+
+/* Custom scrollbar that matches the muted palette. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
