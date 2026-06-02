@@ -53,3 +53,22 @@ npm run preview  # previsualizar el build
 npm test         # ejecutar los tests (Vitest)
 npm run lint     # comprobación de tipos (tsc --noEmit)
 ```
+
+## Despliegue (Cloudflare Pages)
+
+La app es estática y se sirve en **opendata.manuelcerezo.com** vía Cloudflare Pages,
+conectada a este repositorio (auto-deploy en cada push a `main`).
+
+Ajustes del proyecto en Cloudflare Pages:
+
+| Ajuste | Valor |
+| --- | --- |
+| Framework preset | None / Vite |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node version | `22` (fijado en `.nvmrc`) |
+
+- `public/_redirects` contiene `/* /index.html 200` para que el enrutado de
+  React Router funcione en recargas y enlaces profundos (SPA fallback).
+- No requiere variables de entorno ni backend: los datos se consultan
+  directamente contra la API pública de datos.gob.es (CORS abierto).
