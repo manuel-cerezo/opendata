@@ -225,17 +225,43 @@ function namedPublishers(stats: CatalogStats, names?: Record<string, string>) {
 
 const SECTOR_PREVIEW = 10;
 
+/** Lower-cased and accent-stripped, for accent-insensitive search. */
+function normalizeText(s: string): string {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
 function SectorGrid({ stats }: { stats: CatalogStats }) {
   const [showAll, setShowAll] = useState(false);
+  const [query, setQuery] = useState("");
   const all = stats.bySector; // already sorted by count descending
   const max = Math.max(1, ...all.map((c) => c.value));
-  const visible = showAll ? all : all.slice(0, SECTOR_PREVIEW);
+
+  const q = normalizeText(query.trim());
+  const searching = q.length > 0;
+  const filtered = searching ? all.filter((s) => normalizeText(s.label).includes(q)) : all;
+  const visible = searching ? filtered : showAll ? all : all.slice(0, SECTOR_PREVIEW);
   const hidden = all.length - SECTOR_PREVIEW;
 
   return (
     <div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {visible.map((sector) => (
+      <div className="relative mb-3">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar sector…"
+          aria-label="Buscar sector temático"
+          className="w-full rounded-lg border border-border bg-surface px-4 py-2 text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-accent"
+        />
+      </div>
+
+      {searching && filtered.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted">
+          Ningún sector coincide con «{query.trim()}».
+        </p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {visible.map((sector) => (
           <Link
             key={sector.key}
             to={`/datasets?sector=${sector.key}`}
@@ -261,10 +287,11 @@ function SectorGrid({ stats }: { stats: CatalogStats }) {
               />
             </div>
           </Link>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {hidden > 0 && (
+      {!searching && hidden > 0 && (
         <button
           onClick={() => setShowAll((s) => !s)}
           className="mt-4 w-full rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent"
