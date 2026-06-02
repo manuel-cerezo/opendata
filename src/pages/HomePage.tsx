@@ -6,10 +6,16 @@ import { RESOURCES, type Resource } from "@/data/resources";
 const CATEGORIES: Resource["category"][] = ["España", "Europa", "Internacional", "Herramientas"];
 
 const FEATURES = [
-  { to: "/panel", title: "Panel", text: "Métricas y gráficos interactivos del catálogo en Apache ECharts." },
-  { to: "/datasets", title: "Conjuntos", text: "Busca y explora miles de conjuntos de datos con paginación." },
-  { to: "/sectores", title: "Sectores", text: "Reparto de los datos por sector temático (NTI)." },
-  { to: "/organismos", title: "Organismos", text: "Qué administraciones publican más datos abiertos." },
+  {
+    to: "/datos-gob-es",
+    title: "datos.gob.es",
+    text: "Toda la analítica del catálogo en una página: sectores, formatos, organismos y evolución, con gráficos interactivos en Apache ECharts.",
+  },
+  {
+    to: "/datasets",
+    title: "Conjuntos",
+    text: "Busca por título y filtra por sector, formato u organismo. Miles de conjuntos de datos con paginación.",
+  },
 ];
 
 function ResourceCard({ resource }: { resource: Resource }) {
@@ -39,19 +45,22 @@ export default function HomePage() {
             Un explorador del catálogo de{" "}
             <a href="https://datos.gob.es/es/" target="_blank" rel="noreferrer" className="text-accent underline-offset-2 hover:underline">
               datos.gob.es
-            </a>{" "}
-            con visualizaciones interactivas en Apache ECharts. Navega entre conjuntos de
-            datos, sectores y organismos publicadores.
+            </a>
+            , el portal de datos abiertos del Gobierno de España. Todos los datos se obtienen en
+            directo de su API pública y se visualizan con Apache ECharts.
           </>
         }
       >
-        <div className="flex flex-wrap gap-3">
-          <Link to="/panel" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90">
-            Ver el panel
-          </Link>
-          <Link to="/datasets" className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent">
-            Explorar conjuntos
-          </Link>
+        <div className="flex flex-col gap-4">
+          <Badge tone="accent">Fuente única: datos.gob.es</Badge>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/datos-gob-es" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90 dark:text-dark">
+              Ver datos.gob.es
+            </Link>
+            <Link to="/datasets" className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent">
+              Explorar conjuntos
+            </Link>
+          </div>
         </div>
       </PageHeader>
 

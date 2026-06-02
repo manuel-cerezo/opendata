@@ -3,10 +3,8 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const NAV = [
   { to: "/", label: "Inicio", end: true },
-  { to: "/panel", label: "Panel" },
+  { to: "/datos-gob-es", label: "datos.gob.es" },
   { to: "/datasets", label: "Conjuntos" },
-  { to: "/sectores", label: "Sectores" },
-  { to: "/organismos", label: "Organismos" },
 ];
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -24,7 +22,10 @@ export function Sidebar() {
       <div className="flex items-center justify-between gap-3 border-b border-border p-4 md:border-0 md:p-0">
         <NavLink to="/" className="flex items-center gap-2.5">
           <img src="/favicon.svg" alt="" width="28" height="28" />
-          <span className="font-heading text-xl leading-none text-fg">OpenData</span>
+          <span className="flex flex-col leading-none">
+            <span className="font-heading text-xl text-fg">OpenData</span>
+            <span className="mt-0.5 text-[11px] text-muted">datos abiertos · España</span>
+          </span>
         </NavLink>
         <div className="md:hidden">
           <ThemeToggle />

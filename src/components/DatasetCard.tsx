@@ -4,7 +4,13 @@ import { sectorLabel } from "@/constants/sectors";
 import { formatDate } from "@/lib/format";
 import type { DatasetSummary } from "@/lib/api/types";
 
-export function DatasetCard({ dataset }: { dataset: DatasetSummary }) {
+export function DatasetCard({
+  dataset,
+  publisherName,
+}: {
+  dataset: DatasetSummary;
+  publisherName?: string;
+}) {
   return (
     <Link
       to={`/datasets/${dataset.id}`}
@@ -28,9 +34,10 @@ export function DatasetCard({ dataset }: { dataset: DatasetSummary }) {
         ))}
       </div>
 
-      {dataset.issued && (
-        <p className="mt-3 text-xs text-muted">Alta: {formatDate(dataset.issued)}</p>
-      )}
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+        {publisherName && <span className="font-medium text-fg/80">{publisherName}</span>}
+        {dataset.issued && <span>Alta: {formatDate(dataset.issued)}</span>}
+      </div>
     </Link>
   );
 }

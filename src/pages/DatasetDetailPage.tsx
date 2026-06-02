@@ -2,13 +2,15 @@ import { Link, useParams } from "react-router-dom";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState, EmptyState } from "@/components/ui/States";
-import { useDataset } from "@/lib/queries";
+import { useDataset, usePublisherNames } from "@/lib/queries";
 import { sectorLabel } from "@/constants/sectors";
 import { formatDate, formatBytes } from "@/lib/format";
 
 export default function DatasetDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, isError, error, refetch } = useDataset(id);
+  const names = usePublisherNames(data?.publisherCode ? [data.publisherCode] : []);
+  const publisherName = data?.publisherCode ? names.data?.[data.publisherCode] : undefined;
 
   return (
     <div>
@@ -79,7 +81,16 @@ export default function DatasetDetailPage() {
                 <Detail label="Alta" value={formatDate(data.issued)} />
                 <Detail label="Última modificación" value={formatDate(data.modified)} />
                 {data.publisherCode && (
-                  <Detail label="Organismo" value={data.publisherCode} />
+                  <div className="flex justify-between gap-3">
+                    <span className="text-muted">Organismo</span>
+                    <Link
+                      to={`/datasets?publisher=${data.publisherCode}`}
+                      className="text-right font-medium text-accent underline-offset-2 hover:underline"
+                      title={data.publisherCode}
+                    >
+                      {publisherName ?? data.publisherCode}
+                    </Link>
+                  </div>
                 )}
                 <Detail label="Formatos" value={data.formats.join(", ") || "—"} />
                 <div className="border-t border-border pt-3">

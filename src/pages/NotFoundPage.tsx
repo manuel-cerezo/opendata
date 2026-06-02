@@ -8,7 +8,7 @@ export default function NotFoundPage() {
         title="Página no encontrada"
         description="La página que buscas no existe o se ha movido."
       >
-        <Link to="/" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90">
+        <Link to="/" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90 dark:text-dark">
           Volver al inicio
         </Link>
       </PageHeader>

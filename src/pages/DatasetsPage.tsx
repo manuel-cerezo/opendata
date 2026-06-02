@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Spinner, ErrorState, EmptyState } from "@/components/ui/States";
 import { DatasetCard } from "@/components/DatasetCard";
-import { useDatasets } from "@/lib/queries";
+import { useDatasets, usePublisherNames } from "@/lib/queries";
 import { SECTORS } from "@/constants/sectors";
 
 const FORMATS = ["CSV", "JSON", "XML", "XLSX", "PDF", "GEOJSON", "HTML", "RDF"];
@@ -28,6 +28,12 @@ export default function DatasetsPage() {
     page,
     pageSize: PAGE_SIZE,
   });
+
+  // Resolve organism names for the datasets on screen (plus the active filter).
+  const codes = (data?.items ?? [])
+    .map((d) => d.publisherCode)
+    .filter((c): c is string => !!c);
+  const names = usePublisherNames(publisher ? [...codes, publisher] : codes);
 
   function update(next: Record<string, string>, resetPage = true) {
     const merged = new URLSearchParams(params);
@@ -61,7 +67,7 @@ export default function DatasetsPage() {
             aria-label="Buscar conjuntos de datos por título"
             className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-4 py-2 text-sm text-fg outline-none transition-colors placeholder:text-muted focus:border-accent"
           />
-          <button type="submit" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90">
+          <button type="submit" className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-light transition-opacity hover:opacity-90 dark:text-dark">
             Buscar
           </button>
         </div>
@@ -104,7 +110,8 @@ export default function DatasetsPage() {
 
       {publisher && (
         <p className="mb-6 text-sm text-muted">
-          Filtrando por organismo <span className="font-medium text-fg">{publisher}</span>
+          Filtrando por organismo{" "}
+          <span className="font-medium text-fg">{names.data?.[publisher] ?? publisher}</span>
         </p>
       )}
 
@@ -120,7 +127,11 @@ export default function DatasetsPage() {
           ) : (
             <div className={`space-y-3 transition-opacity ${isPlaceholderData ? "opacity-60" : ""}`}>
               {data.items.map((dataset) => (
-                <DatasetCard key={dataset.id} dataset={dataset} />
+                <DatasetCard
+                  key={dataset.id}
+                  dataset={dataset}
+                  publisherName={dataset.publisherCode ? names.data?.[dataset.publisherCode] : undefined}
+                />
               ))}
             </div>
           )}
