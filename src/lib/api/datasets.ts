@@ -13,6 +13,8 @@ export interface DatasetQuery {
   format?: string;
   /** Publisher org code (e.g. `L01281317`). */
   publisher?: string;
+  /** apidata `_sort` expression, e.g. `-issued` for newest first. */
+  sort?: string;
 }
 
 function buildPath(q: DatasetQuery): string {
@@ -33,7 +35,7 @@ export async function getDatasets(
   const pageSize = q.pageSize ?? 20;
   const result = await apiGetList<RawDataset>(
     buildPath(q),
-    { _page: page, _pageSize: pageSize },
+    { _page: page, _pageSize: pageSize, _sort: q.sort },
     signal,
   );
   const rawItems = result.items ?? [];

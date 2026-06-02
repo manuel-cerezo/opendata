@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState } from "@/components/ui/States";
-import { useCatalogStats, usePublisherNames } from "@/lib/queries";
+import { DatasetCard } from "@/components/DatasetCard";
+import { useCatalogStats, useDatasets, usePublisherNames } from "@/lib/queries";
 import { SECTORS, sectorColor } from "@/constants/sectors";
 import { formatNumber } from "@/lib/format";
 import type { CatalogStats } from "@/lib/api/aggregations";
@@ -29,6 +30,7 @@ const ANCHORS = [
   { id: "formatos", label: "Formatos" },
   { id: "organismos", label: "Organismos" },
   { id: "evolucion", label: "Evolución" },
+  { id: "recientes", label: "Recientes" },
 ];
 
 function Stat({ label, value }: { label: string; value: string }) {
@@ -48,9 +50,21 @@ function Section({ id, children }: { id: string; children: ReactNode }) {
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export default function DataGobPage() {
   const { data: stats, isLoading, isError, error, refetch } = useCatalogStats();
   const names = usePublisherNames(stats?.byPublisher.map((p) => p.key) ?? []);
+
+  // Newest datasets (a few extra are fetched so future-dated outliers can be
+  // dropped before showing six).
+  const recentQuery = useDatasets({ pageSize: 10, sort: "-issued" });
+  const recent = (recentQuery.data?.items ?? [])
+    .filter((d) => d.year == null || d.year <= CURRENT_YEAR)
+    .slice(0, 6);
+  const recentNames = usePublisherNames(
+    recent.map((d) => d.publisherCode).filter((c): c is string => !!c),
+  );
 
   return (
     <div>
@@ -159,6 +173,35 @@ export default function DataGobPage() {
                   <YearLine data={stats.byYear} />
                 </Suspense>
               </Card>
+            </Section>
+
+            <Section id="recientes">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <h2 className="text-2xl text-fg">Conjuntos recientes</h2>
+                <Link
+                  to="/datasets"
+                  className="shrink-0 text-sm font-medium text-accent underline-offset-2 hover:underline"
+                >
+                  Ver todos →
+                </Link>
+              </div>
+              {recentQuery.isLoading ? (
+                <Spinner label="Cargando conjuntos recientes…" />
+              ) : recent.length === 0 ? (
+                <p className="text-sm text-muted">No se pudieron cargar los conjuntos recientes.</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {recent.map((dataset) => (
+                    <DatasetCard
+                      key={dataset.id}
+                      dataset={dataset}
+                      publisherName={
+                        dataset.publisherCode ? recentNames.data?.[dataset.publisherCode] : undefined
+                      }
+                    />
+                  ))}
+                </div>
+              )}
             </Section>
           </div>
 

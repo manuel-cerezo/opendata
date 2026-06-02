@@ -50,11 +50,24 @@ export function horizontalBarOption(
   data: Count[],
   t: ChartTheme,
   color = t.accent,
+  unit = "conjuntos",
 ): EChartsCoreOption {
   const ordered = [...data].reverse();
   return {
     grid: { left: 8, right: 24, top: 12, bottom: 8, containLabel: true },
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" }, ...baseTooltip(t) },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+      ...baseTooltip(t),
+      // Show the full (untruncated) category name plus a formatted count.
+      formatter: (params: unknown) => {
+        const item = Array.isArray(params) ? params[0] : params;
+        const p = item as { name?: string; value?: number; color?: string };
+        const swatch = `<span style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:${p.color};margin-right:6px"></span>`;
+        const value = new Intl.NumberFormat("es-ES").format(p.value ?? 0);
+        return `<strong>${p.name ?? ""}</strong><br/>${swatch}${value} ${unit}`;
+      },
+    },
     xAxis: {
       type: "value",
       axisLabel: { color: t.text, fontFamily: FONT },
