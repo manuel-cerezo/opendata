@@ -4,6 +4,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const NAV = [
   { to: "/", label: "Inicio", end: true },
   { to: "/datos-gob-es", label: "datos.gob.es" },
+  { to: "/indicadores", label: "Indicadores" },
   { to: "/datasets", label: "Conjuntos" },
 ];
 

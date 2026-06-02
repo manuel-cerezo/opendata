@@ -181,6 +181,91 @@ export function donutOption(
   };
 }
 
+export interface TimeSeries {
+  name: string;
+  color: string;
+  /** Values aligned to the shared `categories` (null = gap). */
+  values: (number | null)[];
+}
+
+/**
+ * Multi-series time-series chart (line, or filled area when there is a single
+ * series). Includes a slider zoom when there are many points.
+ */
+export function timeSeriesOption(
+  categories: string[],
+  series: TimeSeries[],
+  t: ChartTheme,
+  opts: { unit?: string; decimals?: number; area?: boolean } = {},
+): EChartsCoreOption {
+  const { unit = "", decimals = 1, area = false } = opts;
+  const nf = new Intl.NumberFormat("es-ES", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+  const showZoom = categories.length > 16;
+
+  return {
+    grid: { left: 8, right: 16, top: series.length > 1 ? 40 : 16, bottom: showZoom ? 48 : 8, containLabel: true },
+    legend:
+      series.length > 1
+        ? { top: 0, textStyle: { color: t.text, fontFamily: FONT }, data: series.map((s) => s.name) }
+        : undefined,
+    tooltip: {
+      trigger: "axis",
+      ...baseTooltip(t),
+      valueFormatter: (value: unknown) =>
+        typeof value === "number" ? `${nf.format(value)}${unit ? ` ${unit}` : ""}` : "—",
+    },
+    dataZoom: showZoom
+      ? [
+          { type: "inside", start: 60, end: 100 },
+          {
+            type: "slider",
+            start: 60,
+            end: 100,
+            height: 18,
+            bottom: 8,
+            borderColor: t.split,
+            fillerColor: "rgba(38,77,55,0.10)",
+            handleStyle: { color: t.accent },
+            textStyle: { color: t.text, fontFamily: FONT },
+          },
+        ]
+      : undefined,
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: categories,
+      axisLabel: { color: t.text, fontFamily: FONT },
+      axisLine: { lineStyle: { color: t.axis } },
+    },
+    yAxis: {
+      type: "value",
+      scale: true,
+      axisLabel: {
+        color: t.text,
+        fontFamily: FONT,
+        formatter: (v: number) => nf.format(v),
+      },
+      splitLine: { lineStyle: { color: t.split } },
+    },
+    series: series.map((s) => ({
+      name: s.name,
+      type: "line",
+      smooth: true,
+      showSymbol: false,
+      connectNulls: true,
+      data: s.values,
+      lineStyle: { color: s.color, width: 2.5 },
+      itemStyle: { color: s.color },
+      ...(area && series.length === 1
+        ? { areaStyle: { color: s.color, opacity: 0.12 } }
+        : {}),
+    })),
+  };
+}
+
 /** Area line chart for time series (e.g. datasets per year). */
 export function areaLineOption(
   data: Count[],

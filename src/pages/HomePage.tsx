@@ -12,6 +12,11 @@ const FEATURES = [
     text: "Toda la analítica del catálogo en una página: sectores, formatos, organismos y evolución, con gráficos interactivos en Apache ECharts.",
   },
   {
+    to: "/indicadores",
+    title: "Indicadores",
+    text: "Series temporales del INE: inflación, PIB, paro, población y precio de la vivienda.",
+  },
+  {
     to: "/datasets",
     title: "Conjuntos",
     text: "Busca por título y filtra por sector, formato u organismo. Miles de conjuntos de datos con paginación.",

@@ -9,6 +9,7 @@ import { lazyWithReload } from "@/lib/lazyWithReload";
 // chunk. lazyWithReload recovers from stale chunks after a new deploy.
 const HomePage = lazyWithReload(() => import("@/pages/HomePage"));
 const DataGobPage = lazyWithReload(() => import("@/pages/DataGobPage"));
+const IndicadoresPage = lazyWithReload(() => import("@/pages/IndicadoresPage"));
 const DatasetsPage = lazyWithReload(() => import("@/pages/DatasetsPage"));
 const DatasetDetailPage = lazyWithReload(() => import("@/pages/DatasetDetailPage"));
 const NotFoundPage = lazyWithReload(() => import("@/pages/NotFoundPage"));
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: page(<HomePage />) },
       { path: "datos-gob-es", element: page(<DataGobPage />) },
+      { path: "indicadores", element: page(<IndicadoresPage />) },
       { path: "datasets", element: page(<DatasetsPage />) },
       { path: "datasets/:id", element: page(<DatasetDetailPage />) },
       // The panel, sectors and publishers views were merged into /datos-gob-es.
