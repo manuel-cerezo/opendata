@@ -46,23 +46,56 @@ export function coerceUri(value: unknown): string | null {
 }
 
 /**
- * Derive an uppercase format code from a distribution `format`, which may be a
- * file-type URI string (`.../file-type/CSV`) or a MIME object
+ * Map verbose MIME/file-type codes to short, friendly labels (e.g. the OOXML
+ * spreadsheet type → `XLSX`). Falls back to the raw code uppercased.
+ */
+const FORMAT_ALIASES: Record<string, string> = {
+  "PLAIN": "TXT",
+  "GEO+JSON": "GEOJSON",
+  "VND.GEO+JSON": "GEOJSON",
+  "VND.MS-EXCEL": "XLS",
+  "VND.MS-POWERPOINT": "PPT",
+  "MSWORD": "DOC",
+  "VND.OASIS.OPENDOCUMENT.SPREADSHEET": "ODS",
+  "VND.OASIS.OPENDOCUMENT.TEXT": "ODT",
+  "VND.OASIS.OPENDOCUMENT.PRESENTATION": "ODP",
+  "VND.GOOGLE-EARTH.KML+XML": "KML",
+  "VND.GOOGLE-EARTH.KMZ": "KMZ",
+  "OCTET-STREAM": "BIN",
+  "X-PC-AXIS": "PC-AXIS",
+};
+
+export function prettifyFormat(raw: string): string {
+  let code = raw.toUpperCase().replace(/^X-/, "");
+  // Office Open XML types vary only by their *ml subtype.
+  if (code.includes("SPREADSHEETML")) return "XLSX";
+  if (code.includes("WORDPROCESSINGML")) return "DOCX";
+  if (code.includes("PRESENTATIONML")) return "PPTX";
+  if (FORMAT_ALIASES[code]) return FORMAT_ALIASES[code];
+  // Drop a leading vendor prefix like `VND.OPENXMLFORMATS-` if still present.
+  code = code.replace(/^VND\.[A-Z0-9-]+\./, "");
+  return code;
+}
+
+/**
+ * Derive a short, friendly format code from a distribution `format`, which may
+ * be a file-type URI string (`.../file-type/CSV`) or a MIME object
  * (`{ value: "text/pc-axis" }`).
  */
 export function extractFormatCode(format: unknown): string | null {
   if (typeof format === "string") {
-    return lastUriSegment(format)?.toUpperCase() ?? null;
+    const seg = lastUriSegment(format);
+    return seg ? prettifyFormat(seg) : null;
   }
   if (format && typeof format === "object") {
     const o = format as { value?: unknown; _about?: unknown };
     if (typeof o.value === "string" && o.value.includes("/")) {
       const subtype = o.value.split("/").pop() ?? o.value;
-      return subtype.replace(/^x-/i, "").toUpperCase() || null;
+      return subtype ? prettifyFormat(subtype) : null;
     }
     // The `_about` of a format object ends in `/format`, which is not useful.
     const seg = lastUriSegment(o._about);
-    return seg && seg.toLowerCase() !== "format" ? seg.toUpperCase() : null;
+    return seg && seg.toLowerCase() !== "format" ? prettifyFormat(seg) : null;
   }
   return null;
 }

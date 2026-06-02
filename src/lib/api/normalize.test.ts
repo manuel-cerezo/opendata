@@ -3,6 +3,7 @@ import {
   pickLang,
   lastUriSegment,
   parseSpanishDate,
+  prettifyFormat,
   toArray,
   normalizeDataset,
 } from "./normalize";
@@ -68,6 +69,23 @@ describe("parseSpanishDate", () => {
 
   it("returns nulls for empty or unparseable input", () => {
     expect(parseSpanishDate(undefined)).toEqual({ iso: null, year: null });
+  });
+});
+
+describe("prettifyFormat", () => {
+  it("shortens Office Open XML types", () => {
+    expect(prettifyFormat("vnd.openxmlformats-officedocument.spreadsheetml.sheet")).toBe("XLSX");
+    expect(prettifyFormat("OFFICEDOCUMENT.WORDPROCESSINGML.DOCUMENT")).toBe("DOCX");
+    expect(prettifyFormat("vnd.openxmlformats-officedocument.presentationml.presentation")).toBe(
+      "PPTX",
+    );
+  });
+
+  it("maps common aliases and leaves plain codes intact", () => {
+    expect(prettifyFormat("plain")).toBe("TXT");
+    expect(prettifyFormat("vnd.ms-excel")).toBe("XLS");
+    expect(prettifyFormat("CSV")).toBe("CSV");
+    expect(prettifyFormat("pc-axis")).toBe("PC-AXIS");
   });
 });
 

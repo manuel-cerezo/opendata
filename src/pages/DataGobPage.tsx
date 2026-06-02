@@ -1,4 +1,4 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState } from "@/components/ui/States";
 import { DatasetCard } from "@/components/DatasetCard";
 import { useCatalogStats, useDatasets, usePublisherNames } from "@/lib/queries";
-import { SECTORS, sectorColor } from "@/constants/sectors";
+import { sectorColor } from "@/constants/sectors";
 import { formatNumber } from "@/lib/format";
 import type { CatalogStats } from "@/lib/api/aggregations";
 
@@ -223,14 +223,19 @@ function namedPublishers(stats: CatalogStats, names?: Record<string, string>) {
   return stats.byPublisher.map((p) => ({ ...p, label: names[p.key] ?? p.label }));
 }
 
+const SECTOR_PREVIEW = 10;
+
 function SectorGrid({ stats }: { stats: CatalogStats }) {
-  const counts = new Map(stats.bySector.map((c) => [c.key, c.value]));
-  const max = Math.max(1, ...stats.bySector.map((c) => c.value));
+  const [showAll, setShowAll] = useState(false);
+  const all = stats.bySector; // already sorted by count descending
+  const max = Math.max(1, ...all.map((c) => c.value));
+  const visible = showAll ? all : all.slice(0, SECTOR_PREVIEW);
+  const hidden = all.length - SECTOR_PREVIEW;
+
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      {SECTORS.map((sector) => {
-        const value = counts.get(sector.key) ?? 0;
-        return (
+    <div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {visible.map((sector) => (
           <Link
             key={sector.key}
             to={`/datasets?sector=${sector.key}`}
@@ -244,17 +249,29 @@ function SectorGrid({ stats }: { stats: CatalogStats }) {
                 />
                 {sector.label}
               </span>
-              <span className="text-sm text-muted">{formatNumber(value)}</span>
+              <span className="text-sm text-muted">{formatNumber(sector.value)}</span>
             </div>
             <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-bg">
               <div
                 className="h-full rounded-full"
-                style={{ width: `${(value / max) * 100}%`, backgroundColor: sectorColor(sector.key) }}
+                style={{
+                  width: `${(sector.value / max) * 100}%`,
+                  backgroundColor: sectorColor(sector.key),
+                }}
               />
             </div>
           </Link>
-        );
-      })}
+        ))}
+      </div>
+
+      {hidden > 0 && (
+        <button
+          onClick={() => setShowAll((s) => !s)}
+          className="mt-4 w-full rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent"
+        >
+          {showAll ? "Mostrar menos" : `Mostrar más (${hidden})`}
+        </button>
+      )}
     </div>
   );
 }
@@ -276,18 +293,25 @@ function PublisherRanking({
           <Link
             key={pub.key}
             to={`/datasets?publisher=${pub.key}`}
-            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-colors hover:border-accent"
+            className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-all hover:-translate-y-0.5 hover:border-accent hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]"
           >
             <span className="flex min-w-0 items-center gap-3">
-              <span className="font-heading text-lg text-muted">{i + 1}</span>
+              <span className="font-heading text-lg text-muted transition-colors group-hover:text-accent">
+                {i + 1}
+              </span>
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-fg">
+                <span className="block truncate text-sm font-medium text-fg group-hover:text-accent">
                   {name ?? (loading ? "Resolviendo nombre…" : pub.key)}
                 </span>
                 {name && <span className="block text-xs text-muted">{pub.key}</span>}
               </span>
             </span>
-            <span className="shrink-0 text-sm text-muted">{formatNumber(pub.value)} conjuntos</span>
+            <span className="flex shrink-0 items-center gap-2 text-sm text-muted">
+              {formatNumber(pub.value)} conjuntos
+              <span className="text-accent opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true">
+                →
+              </span>
+            </span>
           </Link>
         );
       })}

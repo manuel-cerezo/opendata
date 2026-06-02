@@ -123,12 +123,35 @@ export function verticalBarOption(
   };
 }
 
-/** Donut chart with an explicit per-slice colour list. */
+/**
+ * Donut chart with a per-slice colour list. Slices below `minPercent` of the
+ * total are merged into a single "Otros" slice, and the legend shows each
+ * slice's percentage. Clicking a legend entry toggles its slice.
+ */
 export function donutOption(
   data: Count[],
   colors: string[],
   t: ChartTheme,
+  minPercent = 1,
 ): EChartsCoreOption {
+  const total = data.reduce((sum, d) => sum + d.value, 0) || 1;
+
+  const major: { name: string; value: number; color: string }[] = [];
+  let otrosValue = 0;
+  data.forEach((d, i) => {
+    if ((d.value / total) * 100 < minPercent) {
+      otrosValue += d.value;
+    } else {
+      major.push({ name: d.label, value: d.value, color: colors[i % colors.length] });
+    }
+  });
+  if (otrosValue > 0) {
+    major.push({ name: "Otros", value: otrosValue, color: t.text === "#d7dae0" ? "#5b6470" : "#b8bcc4" });
+  }
+
+  const pct = (value: number) => ((value / total) * 100).toFixed(value / total < 0.01 ? 2 : 1);
+  const pctByName = new Map(major.map((m) => [m.name, pct(m.value)]));
+
   return {
     tooltip: { trigger: "item", ...baseTooltip(t), formatter: "{b}: {c} ({d}%)" },
     legend: {
@@ -138,6 +161,7 @@ export function donutOption(
       top: "center",
       textStyle: { color: t.text, fontFamily: FONT },
       pageTextStyle: { color: t.text },
+      formatter: (name: string) => `${name}  ·  ${pctByName.get(name) ?? "0"}%`,
     },
     series: [
       {
@@ -147,10 +171,10 @@ export function donutOption(
         avoidLabelOverlap: true,
         itemStyle: { borderColor: t.tooltipBg, borderWidth: 2 },
         label: { show: false },
-        data: data.map((d, i) => ({
-          name: d.label,
-          value: d.value,
-          itemStyle: { color: colors[i % colors.length] },
+        data: major.map((m) => ({
+          name: m.name,
+          value: m.value,
+          itemStyle: { color: m.color },
         })),
       },
     ],
