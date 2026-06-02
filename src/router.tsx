@@ -1,14 +1,17 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
+import { RouteError } from "@/components/RouteError";
 import { Spinner } from "@/components/ui/States";
+import { lazyWithReload } from "@/lib/lazyWithReload";
 
-// Route-level code splitting keeps each page (and its data deps) in its own chunk.
-const HomePage = lazy(() => import("@/pages/HomePage"));
-const DataGobPage = lazy(() => import("@/pages/DataGobPage"));
-const DatasetsPage = lazy(() => import("@/pages/DatasetsPage"));
-const DatasetDetailPage = lazy(() => import("@/pages/DatasetDetailPage"));
-const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
+// Route-level code splitting keeps each page (and its data deps) in its own
+// chunk. lazyWithReload recovers from stale chunks after a new deploy.
+const HomePage = lazyWithReload(() => import("@/pages/HomePage"));
+const DataGobPage = lazyWithReload(() => import("@/pages/DataGobPage"));
+const DatasetsPage = lazyWithReload(() => import("@/pages/DatasetsPage"));
+const DatasetDetailPage = lazyWithReload(() => import("@/pages/DatasetDetailPage"));
+const NotFoundPage = lazyWithReload(() => import("@/pages/NotFoundPage"));
 
 function page(node: React.ReactNode) {
   return <Suspense fallback={<Spinner />}>{node}</Suspense>;
@@ -17,6 +20,7 @@ function page(node: React.ReactNode) {
 export const router = createBrowserRouter([
   {
     element: <Layout />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: page(<HomePage />) },
       { path: "datos-gob-es", element: page(<DataGobPage />) },
