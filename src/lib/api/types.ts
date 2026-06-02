@@ -2,10 +2,13 @@
 
 export type LangValue = string | { _value: string; _lang?: string };
 
+/** A reference is either a URI string or an object carrying the URI / value. */
+export type RawReference = string | { _about?: string; value?: string; type?: string };
+
 export interface RawDistribution {
   _about?: string;
   accessURL?: string;
-  format?: string;
+  format?: RawReference;
   byteSize?: number | string;
   title?: LangValue | LangValue[];
 }
@@ -14,9 +17,9 @@ export interface RawDataset {
   _about: string;
   title?: LangValue | LangValue[];
   description?: LangValue | LangValue[];
-  theme?: string | string[];
+  theme?: RawReference | RawReference[];
   distribution?: RawDistribution | RawDistribution[];
-  publisher?: string | string[];
+  publisher?: RawReference | RawReference[];
   issued?: string;
   modified?: string;
   identifier?: string;

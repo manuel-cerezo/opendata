@@ -24,11 +24,47 @@ export function pickLang(value: LangValue | LangValue[] | undefined, lang = "es"
 }
 
 /** Final non-empty path segment of a URI (used for slugs / sector keys). */
-export function lastUriSegment(uri: string | undefined | null): string | null {
-  if (!uri) return null;
+export function lastUriSegment(uri: unknown): string | null {
+  if (typeof uri !== "string" || !uri) return null;
   const clean = uri.split(/[?#]/)[0].replace(/\/+$/, "");
   const seg = clean.substring(clean.lastIndexOf("/") + 1);
   return seg || null;
+}
+
+/**
+ * The apidata returns reference fields (theme, publisher) either as plain URI
+ * strings or as objects like `{ _about, value }`. Resolve them to a URI string.
+ */
+export function coerceUri(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    const o = value as { _about?: unknown; value?: unknown };
+    if (typeof o._about === "string") return o._about;
+    if (typeof o.value === "string") return o.value;
+  }
+  return null;
+}
+
+/**
+ * Derive an uppercase format code from a distribution `format`, which may be a
+ * file-type URI string (`.../file-type/CSV`) or a MIME object
+ * (`{ value: "text/pc-axis" }`).
+ */
+export function extractFormatCode(format: unknown): string | null {
+  if (typeof format === "string") {
+    return lastUriSegment(format)?.toUpperCase() ?? null;
+  }
+  if (format && typeof format === "object") {
+    const o = format as { value?: unknown; _about?: unknown };
+    if (typeof o.value === "string" && o.value.includes("/")) {
+      const subtype = o.value.split("/").pop() ?? o.value;
+      return subtype.replace(/^x-/i, "").toUpperCase() || null;
+    }
+    // The `_about` of a format object ends in `/format`, which is not useful.
+    const seg = lastUriSegment(o._about);
+    return seg && seg.toLowerCase() !== "format" ? seg.toUpperCase() : null;
+  }
+  return null;
 }
 
 const SPANISH_MONTHS: Record<string, number> = {
@@ -62,19 +98,19 @@ export function parseSpanishDate(raw: string | undefined | null): {
 
 function extractSectors(theme: RawDataset["theme"]): string[] {
   return toArray(theme)
-    .map((uri) => lastUriSegment(uri))
+    .map((entry) => lastUriSegment(coerceUri(entry)))
     .filter((v): v is string => !!v);
 }
 
 function extractFormats(distribution: RawDataset["distribution"]): string[] {
   const formats = toArray<RawDistribution>(distribution)
-    .map((d) => lastUriSegment(d.format)?.toUpperCase())
+    .map((d) => extractFormatCode(d.format))
     .filter((v): v is string => !!v);
   return Array.from(new Set(formats));
 }
 
 export function normalizeDataset(raw: RawDataset): DatasetSummary {
-  const publisherUri = toArray(raw.publisher)[0] ?? null;
+  const publisherUri = coerceUri(toArray(raw.publisher)[0]);
   const { iso, year } = parseSpanishDate(raw.issued);
   return {
     id: lastUriSegment(raw._about) ?? "",
@@ -97,7 +133,7 @@ export function normalizeDatasetDetail(raw: RawDataset): DatasetDetail {
   const summary = normalizeDataset(raw);
   const distributions = toArray<RawDistribution>(raw.distribution).map((d) => ({
     title: pickLang(d.title) || "Distribución",
-    format: lastUriSegment(d.format)?.toUpperCase() ?? null,
+    format: extractFormatCode(d.format),
     accessURL: d.accessURL ?? null,
     byteSize: d.byteSize != null ? Number(d.byteSize) : null,
   }));

@@ -105,6 +105,22 @@ describe("normalizeDataset", () => {
     expect(d.keywords).toEqual(["ruido", "ambiente"]);
   });
 
+  it("handles object-shaped format (MIME) and reference fields without throwing", () => {
+    const d = normalizeDataset({
+      _about: "https://datos.gob.es/catalogo/a02-foo",
+      // theme/publisher/format may arrive as objects instead of URI strings
+      theme: [{ _about: "http://datos.gob.es/kos/sector-publico/sector/salud" }],
+      publisher: { _about: "http://datos.gob.es/recurso/org/Organismo/E05250001" },
+      distribution: [
+        { format: { _about: "https://x/resource/y/format", type: "IMT", value: "text/pc-axis" } },
+        { format: "http://publications.europa.eu/resource/authority/file-type/CSV" },
+      ],
+    });
+    expect(d.sectors).toEqual(["salud"]);
+    expect(d.publisherCode).toBe("E05250001");
+    expect(d.formats).toEqual(["PC-AXIS", "CSV"]);
+  });
+
   it("provides safe fallbacks for missing fields", () => {
     const d = normalizeDataset({ _about: "https://x/catalogo/foo" });
     expect(d.title).toBe("(sin título)");
