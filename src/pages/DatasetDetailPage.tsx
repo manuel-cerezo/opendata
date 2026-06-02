@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState, EmptyState } from "@/components/ui/States";
 import { useDataset, usePublisherNames } from "@/lib/queries";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { sectorLabel } from "@/constants/sectors";
 import { formatDate, formatBytes } from "@/lib/format";
 
@@ -11,6 +12,10 @@ export default function DatasetDetailPage() {
   const { data, isLoading, isError, error, refetch } = useDataset(id);
   const names = usePublisherNames(data?.publisherCode ? [data.publisherCode] : []);
   const publisherName = data?.publisherCode ? names.data?.[data.publisherCode] : undefined;
+  useDocumentMeta(
+    data?.title ?? "Conjunto de datos",
+    data?.description?.slice(0, 200) || "Detalle de un conjunto de datos del catálogo de datos.gob.es.",
+  );
 
   return (
     <div>

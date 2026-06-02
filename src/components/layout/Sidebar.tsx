@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
+import { RefreshButton } from "./RefreshButton";
 
 const NAV = [
   { to: "/", label: "Inicio", end: true },
   { to: "/datos-gob-es", label: "datos.gob.es" },
   { to: "/indicadores", label: "Indicadores" },
+  { to: "/europa", label: "Europa" },
   { to: "/datasets", label: "Conjuntos" },
 ];
 
@@ -28,7 +30,8 @@ export function Sidebar() {
             <span className="mt-0.5 text-[11px] text-muted">datos abiertos · España</span>
           </span>
         </NavLink>
-        <div className="md:hidden">
+        <div className="flex items-center gap-2 md:hidden">
+          <RefreshButton />
           <ThemeToggle />
         </div>
       </div>
@@ -57,9 +60,12 @@ export function Sidebar() {
           rel="noreferrer"
           className="text-xs text-muted underline-offset-2 hover:text-accent hover:underline"
         >
-          Datos: datos.gob.es
+          datos.gob.es · INE
         </a>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <RefreshButton />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

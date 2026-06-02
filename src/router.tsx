@@ -10,6 +10,7 @@ import { lazyWithReload } from "@/lib/lazyWithReload";
 const HomePage = lazyWithReload(() => import("@/pages/HomePage"));
 const DataGobPage = lazyWithReload(() => import("@/pages/DataGobPage"));
 const IndicadoresPage = lazyWithReload(() => import("@/pages/IndicadoresPage"));
+const EuropaPage = lazyWithReload(() => import("@/pages/EuropaPage"));
 const DatasetsPage = lazyWithReload(() => import("@/pages/DatasetsPage"));
 const DatasetDetailPage = lazyWithReload(() => import("@/pages/DatasetDetailPage"));
 const NotFoundPage = lazyWithReload(() => import("@/pages/NotFoundPage"));
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { index: true, element: page(<HomePage />) },
       { path: "datos-gob-es", element: page(<DataGobPage />) },
       { path: "indicadores", element: page(<IndicadoresPage />) },
+      { path: "europa", element: page(<EuropaPage />) },
       { path: "datasets", element: page(<DatasetsPage />) },
       { path: "datasets/:id", element: page(<DatasetDetailPage />) },
       // The panel, sectors and publishers views were merged into /datos-gob-es.

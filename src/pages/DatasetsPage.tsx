@@ -4,12 +4,17 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Spinner, ErrorState, EmptyState } from "@/components/ui/States";
 import { DatasetCard } from "@/components/DatasetCard";
 import { useDatasets, usePublisherNames } from "@/lib/queries";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { SECTORS } from "@/constants/sectors";
 
 const FORMATS = ["CSV", "JSON", "XML", "XLSX", "PDF", "GEOJSON", "HTML", "RDF"];
 const PAGE_SIZE = 20;
 
 export default function DatasetsPage() {
+  useDocumentMeta(
+    "Conjuntos de datos",
+    "Busca y explora conjuntos de datos del catálogo de datos.gob.es: filtra por sector, formato u organismo.",
+  );
   const [params, setParams] = useSearchParams();
   const query = params.get("q") ?? "";
   const sector = params.get("sector") ?? "";

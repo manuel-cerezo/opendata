@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 
 export default function NotFoundPage() {
+  useDocumentMeta("Página no encontrada");
   return (
     <div>
       <PageHeader

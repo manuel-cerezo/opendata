@@ -33,6 +33,8 @@ export interface IneIndicator {
   nult: number;
   kind: "area" | "line";
   series: IneSeriesRef[];
+  /** Multiplier applied to raw values (e.g. 1000 when the INE reports thousands). */
+  scale?: number;
   /** Short note about the source table/operation. */
   source: string;
 }
@@ -93,6 +95,23 @@ export const INE_INDICATORS: IneIndicator[] = [
     source: "INE · Encuesta de Población Activa (EPA)",
   },
   {
+    id: "ocupados-activos",
+    theme: "empleo",
+    title: "Ocupados y activos",
+    description: "Población ocupada y activa según la EPA (personas).",
+    unit: "personas",
+    decimals: 0,
+    period: "quarter",
+    nult: 48,
+    kind: "line",
+    scale: 1000, // the EPA reports these series in thousands
+    series: [
+      { cod: "EPA387794", label: "Activos", color: TEAL },
+      { cod: "EPA387796", label: "Ocupados", color: GREEN },
+    ],
+    source: "INE · Encuesta de Población Activa (EPA)",
+  },
+  {
     id: "poblacion",
     theme: "demografia",
     title: "Población residente",
@@ -133,6 +152,19 @@ export const INE_INDICATORS: IneIndicator[] = [
     kind: "area",
     series: [{ cod: "IPV948", label: "Variación anual", color: GREEN }],
     source: "INE · Índice de Precios de Vivienda",
+  },
+  {
+    id: "transmisiones-vivienda",
+    theme: "vivienda",
+    title: "Transmisiones de viviendas",
+    description: "Número de fincas urbanas (viviendas) transmitidas al año en España.",
+    unit: "transmisiones",
+    decimals: 0,
+    period: "year",
+    nult: 16,
+    kind: "area",
+    series: [{ cod: "ETDP2201", label: "Viviendas", color: GREEN }],
+    source: "INE · Transmisiones de Derechos de la Propiedad",
   },
 ];
 

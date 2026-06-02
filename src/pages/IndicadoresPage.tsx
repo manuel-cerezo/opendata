@@ -4,6 +4,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState } from "@/components/ui/States";
 import { useIneIndicator } from "@/lib/queries";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { formatNumber } from "@/lib/format";
 import { formatPeriod, type InePoint } from "@/lib/api/ine";
 import { INE_THEMES, indicatorsByTheme, type IneIndicator } from "@/constants/ineIndicators";
@@ -11,12 +12,16 @@ import { INE_THEMES, indicatorsByTheme, type IneIndicator } from "@/constants/in
 const IneChart = lazy(() => import("@/components/charts/IneChart"));
 
 function formatValue(value: number, indicator: IneIndicator): string {
-  if (indicator.unit === "personas") return formatNumber(Math.round(value));
-  const nf = new Intl.NumberFormat("es-ES", {
-    minimumFractionDigits: indicator.decimals,
-    maximumFractionDigits: indicator.decimals,
-  });
-  return indicator.unit === "%" ? `${nf.format(value)} %` : nf.format(value);
+  const scaled = value * (indicator.scale ?? 1);
+  if (indicator.unit === "%") {
+    const nf = new Intl.NumberFormat("es-ES", {
+      minimumFractionDigits: indicator.decimals,
+      maximumFractionDigits: indicator.decimals,
+    });
+    return `${nf.format(scaled)} %`;
+  }
+  // Counts (personas, transmisiones, …): thousands separator, no decimals.
+  return formatNumber(Math.round(scaled));
 }
 
 function lastPoint(points: InePoint[]): InePoint | null {
@@ -62,6 +67,11 @@ function IndicatorCard({ indicator }: { indicator: IneIndicator }) {
 }
 
 export default function IndicadoresPage() {
+  useDocumentMeta(
+    "Indicadores",
+    "Indicadores estadísticos de España (inflación, PIB, paro, población, vivienda) en series temporales del INE, con gráficos en Apache ECharts.",
+  );
+
   return (
     <div>
       <PageHeader

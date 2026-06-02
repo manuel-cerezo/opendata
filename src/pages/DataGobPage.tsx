@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Spinner, ErrorState } from "@/components/ui/States";
 import { DatasetCard } from "@/components/DatasetCard";
 import { useCatalogStats, useDatasets, usePublisherNames } from "@/lib/queries";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { sectorColor } from "@/constants/sectors";
 import { formatNumber } from "@/lib/format";
 import type { CatalogStats } from "@/lib/api/aggregations";
@@ -53,6 +54,10 @@ function Section({ id, children }: { id: string; children: ReactNode }) {
 const CURRENT_YEAR = new Date().getFullYear();
 
 export default function DataGobPage() {
+  useDocumentMeta(
+    "datos.gob.es",
+    "Panorámica del catálogo de datos.gob.es: sectores, formatos, organismos publicadores y evolución, con gráficos interactivos.",
+  );
   const { data: stats, isLoading, isError, error, refetch } = useCatalogStats();
   const names = usePublisherNames(stats?.byPublisher.map((p) => p.key) ?? []);
 

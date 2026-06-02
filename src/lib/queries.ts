@@ -3,7 +3,9 @@ import { getDatasets, getDatasetById, sampleDatasets, type DatasetQuery } from "
 import { computeStats } from "./api/aggregations";
 import { resolvePublisherNames } from "./api/organisms";
 import { getIneSeries } from "./api/ine";
+import { getEurostatSeries } from "./api/eurostat";
 import type { IneIndicator } from "@/constants/ineIndicators";
+import { EURO_GEOS, type EuroIndicator } from "@/constants/euroIndicators";
 
 /** Centralised query keys for cache consistency. */
 export const queryKeys = {
@@ -12,6 +14,7 @@ export const queryKeys = {
   dataset: (id: string) => ["dataset", id] as const,
   publisherNames: (codes: string[]) => ["publisherNames", codes] as const,
   ineIndicator: (id: string, nult: number) => ["ine", id, nult] as const,
+  euroIndicator: (id: string) => ["euro", id] as const,
 };
 
 const THIRTY_MINUTES = 1000 * 60 * 30;
@@ -67,6 +70,25 @@ export function useIneIndicator(indicator: IneIndicator) {
         indicator.series.map((s) => s.cod),
         indicator.nult,
         signal,
+      ),
+    staleTime: ONE_DAY,
+  });
+}
+
+/** Fetch a Eurostat indicator for every geo (España + UE-27) in parallel. */
+export function useEuroIndicator(indicator: EuroIndicator) {
+  return useQuery({
+    queryKey: queryKeys.euroIndicator(indicator.id),
+    queryFn: ({ signal }) =>
+      Promise.all(
+        EURO_GEOS.map((geo) =>
+          getEurostatSeries(
+            indicator.dataset,
+            { ...indicator.params, geo: geo.code },
+            indicator.lastN,
+            signal,
+          ),
+        ),
       ),
     staleTime: ONE_DAY,
   });

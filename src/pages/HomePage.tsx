@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Badge } from "@/components/ui/Badge";
+import { useDocumentMeta } from "@/lib/useDocumentMeta";
 import { RESOURCES, type Resource } from "@/data/resources";
 
 const CATEGORIES: Resource["category"][] = ["España", "Europa", "Internacional", "Herramientas"];
@@ -15,6 +16,11 @@ const FEATURES = [
     to: "/indicadores",
     title: "Indicadores",
     text: "Series temporales del INE: inflación, PIB, paro, población y precio de la vivienda.",
+  },
+  {
+    to: "/europa",
+    title: "Europa",
+    text: "Comparativa España vs. UE-27 (paro, inflación, PIB) con datos de Eurostat.",
   },
   {
     to: "/datasets",
@@ -41,6 +47,11 @@ function ResourceCard({ resource }: { resource: Resource }) {
 }
 
 export default function HomePage() {
+  useDocumentMeta(
+    "",
+    "Explorador de datos abiertos de España: catálogo de datos.gob.es, indicadores del INE y comparativas con Eurostat, visualizados con Apache ECharts.",
+  );
+
   return (
     <div>
       <PageHeader

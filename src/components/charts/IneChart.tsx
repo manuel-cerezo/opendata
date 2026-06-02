@@ -26,6 +26,7 @@ export default function IneChart({
     );
     const categories = longest.points.map((p) => formatPeriod(p.date, indicator.period));
 
+    const scale = indicator.scale ?? 1;
     const series: TimeSeries[] = data.map((serie, i) => {
       const byLabel = new Map(
         serie.points.map((p) => [formatPeriod(p.date, indicator.period), p.value]),
@@ -33,12 +34,16 @@ export default function IneChart({
       return {
         name: indicator.series[i]?.label ?? serie.name,
         color: indicator.series[i]?.color ?? t.accent,
-        values: categories.map((c) => byLabel.get(c) ?? null),
+        values: categories.map((c) => {
+          const v = byLabel.get(c);
+          return v == null ? null : v * scale;
+        }),
       };
     });
 
     return timeSeriesOption(categories, series, t, {
-      unit: indicator.unit === "personas" ? "" : indicator.unit,
+      // Only percentages get a unit suffix; counts stay clean.
+      unit: indicator.unit === "%" ? "%" : "",
       decimals: indicator.decimals,
       area: indicator.kind === "area",
     });
